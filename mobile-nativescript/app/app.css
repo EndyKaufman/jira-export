@@ -1,0 +1,28 @@
+.page-content {
+    background-color: #f0f8ff;
+    padding: 20;
+}
+
+.title {
+    font-size: 24;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+    margin: 20 0;
+}
+
+.info {
+    font-size: 14;
+    color: #666;
+    text-align: center;
+    margin: 10 0 30 0;
+}
+
+.hello-button {
+    font-size: 16;
+    color: white;
+    background-color: #007acc;
+    border-radius: 8;
+    padding: 15 30;
+    margin: 20;
+}

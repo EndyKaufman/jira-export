@@ -1,0 +1,119 @@
+# ============================================================================= 
+# Git Ignore для jira-export проекта
+# Исключает папки сборок, временные файлы и зависимости
+# =============================================================================
+
+# ========== ПАПКИ СБОРОК ПРИЛОЖЕНИЙ ==========
+# Desktop Python сборки (PyInstaller)
+desktop-python/build/
+desktop-python/dist/
+desktop-python/*.spec
+
+# Mobile NativeScript сборки
+mobile-nativescript/platforms/
+mobile-nativescript/hooks/
+mobile-nativescript/node_modules/
+
+# Backend FastAPI временные файлы
+backend-fastapi/requirements-lock.txt
+
+# ========== PYTHON ВИРТУАЛЬНЫЕ СРЕДЫ ==========
+# Виртуальные среды Python (virtualenv)
+desktop-python/.venv/
+backend-fastapi/.venv/
+mobile-nativescript/.venv/
+.venv/
+venv/
+env/
+
+# Python кэш файлы
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# PyInstaller файлы
+*.manifest
+*.spec
+
+# Pytest кэш
+.pytest_cache/
+
+# ========== NODE.JS ЗАВИСИМОСТИ ==========
+# npm зависимости
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ========== IDE И РЕДАКТОРЫ ==========
+# Visual Studio Code
+.vscode/
+
+# JetBrains IDEs
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+
+# ========== ОПЕРАЦИОННАЯ СИСТЕМА ==========
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# ========== ЛОГИ И ВРЕМЕННЫЕ ФАЙЛЫ ==========
+# Логи
+*.log
+logs/
+
+# Временные файлы
+*.tmp
+*.temp
+.tmp/
+
+# Архивы
+*.zip
+*.tar.gz
+*.rar
+
+# ========== КОНФИГУРАЦИОННЫЕ ФАЙЛЫ ==========
+# Локальные переменные окружения
+.env
+.env.local
+.env.*.local
+
+# Конфигурационные файлы IDE
+.vscode/settings.json
+
+# ========== ТЕСТОВЫЕ ФАЙЛЫ ==========
+# Coverage отчеты
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
+# ========== ДОКУМЕНТАЦИЯ ==========
+# Генерируемая документация
+docs/_build/

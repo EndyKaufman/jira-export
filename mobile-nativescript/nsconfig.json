@@ -1,0 +1,6 @@
+{
+  "useLegacyWorkflow": false,
+  "appId": "org.nativescript.hello",
+  "appResourcesPath": "App_Resources",
+  "shared": true
+}

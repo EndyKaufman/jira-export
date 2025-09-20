@@ -1,0 +1,9 @@
+<Page xmlns="http://schemas.nativescript.org/tns.xsd" navigatingTo="onNavigatingTo">
+    <ActionBar title="Привет Мир - Мобильное приложение" />
+    
+    <StackLayout class="page-content">
+        <Label text="Добро пожаловать!" class="title" />
+        <Label text="Нажмите кнопку для получения уведомления" class="info" />
+        <Button text="Нажми меня!" tap="{{ showHelloNotification }}" class="hello-button" />
+    </StackLayout>
+</Page>
