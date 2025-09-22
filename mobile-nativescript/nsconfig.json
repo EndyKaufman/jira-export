@@ -1,6 +1,6 @@
 {
   "useLegacyWorkflow": false,
-  "appId": "org.nativescript.hello",
+  "appId": "ru.site15.jira-export",
   "appResourcesPath": "App_Resources",
   "shared": true
 }
