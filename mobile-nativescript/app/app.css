@@ -113,6 +113,53 @@
     border-radius: 3;
 }
 
+/* Панель массовых действий */
+.mass-actions-panel {
+    background-color: #f39c12;
+    padding: 10;
+    margin: 5;
+    border-radius: 5;
+}
+
+.selected-count {
+    font-size: 14;
+    font-weight: bold;
+    color: white;
+    text-align: center;
+    margin-bottom: 10;
+}
+
+.mass-buttons {
+    margin-top: 5;
+}
+
+.bulk-button {
+    font-size: 12;
+    color: white;
+    background-color: #e74c3c;
+    margin: 2;
+    padding: 8;
+    border-radius: 3;
+}
+
+.clear-button {
+    font-size: 12;
+    color: white;
+    background-color: #95a5a6;
+    margin: 2;
+    padding: 8;
+    border-radius: 3;
+}
+
+.select-all-button {
+    font-size: 12;
+    color: white;
+    background-color: #9b59b6;
+    margin: 2;
+    padding: 8;
+    border-radius: 3;
+}
+
 /* Список задач */
 .tasks-list {
     background-color: white;
@@ -124,6 +171,42 @@
     border-bottom-width: 1;
     border-bottom-color: #ecf0f1;
     background-color: white;
+}
+
+.task-checkbox {
+    font-size: 18;
+    color: #3498db;
+    text-align: center;
+    margin-right: 10;
+    padding: 5;
+}
+
+.action-buttons {
+    margin-left: 10;
+}
+
+.action-btn {
+    font-size: 14;
+    margin: 2;
+    padding: 6;
+    border-radius: 3;
+    min-width: 35;
+    text-align: center;
+}
+
+.details-btn {
+    color: white;
+    background-color: #3498db;
+}
+
+.pdf-btn {
+    color: white;
+    background-color: #e74c3c;
+}
+
+.jira-btn {
+    color: white;
+    background-color: #27ae60;
 }
 
 .task-id {

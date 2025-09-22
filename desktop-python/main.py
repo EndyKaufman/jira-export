@@ -165,35 +165,78 @@ class JiraExportApp:
     def create_table_panel(self, parent):
         """Создает панель с таблицей задач"""
         # Заголовок панели
-        tk.Label(parent, text="Список задач JIRA", font=("Arial", 12, "bold"), bg='white').pack(pady=10)
+        header_frame = tk.Frame(parent, bg='white')
+        header_frame.pack(fill='x', pady=(10, 0))
         
-        # Создаем Treeview для таблицы
-        columns = ("ID", "Заголовок", "Статус", "Приоритет", "Исполнитель", "Обновлено")
-        self.tasks_tree = ttk.Treeview(parent, columns=columns, show='headings', height=15)
+        tk.Label(header_frame, text="Список задач JIRA", font=("Arial", 12, "bold"), bg='white').pack(side='left')
+        
+        # Кнопки для работы с выделенными элементами
+        selected_actions_frame = tk.Frame(header_frame, bg='white')
+        selected_actions_frame.pack(side='right')
+        
+        tk.Button(
+            selected_actions_frame,
+            text="Массовый PDF",
+            command=self.bulk_export_pdf,
+            font=("Arial", 9),
+            bg='#FF6B6B',
+            fg='white',
+            padx=10
+        ).pack(side='left', padx=5)
+        
+        tk.Button(
+            selected_actions_frame,
+            text="Снять выделение",
+            command=self.clear_selection,
+            font=("Arial", 9),
+            bg='#95A5A6',
+            fg='white',
+            padx=10
+        ).pack(side='left', padx=5)
+        
+        # Создаем контейнер для таблицы
+        table_container = tk.Frame(parent, bg='white')
+        table_container.pack(fill='both', expand=True, padx=10, pady=(5, 10))
+        
+        # Создаем Treeview для таблицы с чекбоксами и действиями
+        columns = ("Выбрать", "ID", "Заголовок", "Статус", "Приоритет", "Исполнитель", "Обновлено", "Действия")
+        self.tasks_tree = ttk.Treeview(table_container, columns=columns, show='headings', height=15)
         
         # Настраиваем заголовки столбцов
+        self.tasks_tree.heading("Выбрать", text="☐ Все", command=self.toggle_all_selection)
         self.tasks_tree.heading("ID", text="ID")
         self.tasks_tree.heading("Заголовок", text="Заголовок")
         self.tasks_tree.heading("Статус", text="Статус")
         self.tasks_tree.heading("Приоритет", text="Приоритет")
         self.tasks_tree.heading("Исполнитель", text="Исполнитель")
         self.tasks_tree.heading("Обновлено", text="Обновлено")
+        self.tasks_tree.heading("Действия", text="Действия")
         
         # Настраиваем ширину столбцов
+        self.tasks_tree.column("Выбрать", width=60, minwidth=60)
         self.tasks_tree.column("ID", width=80, minwidth=60)
-        self.tasks_tree.column("Заголовок", width=250, minwidth=150)
+        self.tasks_tree.column("Заголовок", width=200, minwidth=150)
         self.tasks_tree.column("Статус", width=100, minwidth=80)
         self.tasks_tree.column("Приоритет", width=80, minwidth=60)
         self.tasks_tree.column("Исполнитель", width=120, minwidth=80)
         self.tasks_tree.column("Обновлено", width=100, minwidth=80)
+        self.tasks_tree.column("Действия", width=200, minwidth=150)
         
         # Добавляем скроллбар
-        scrollbar = ttk.Scrollbar(parent, orient='vertical', command=self.tasks_tree.yview)
+        scrollbar = ttk.Scrollbar(table_container, orient='vertical', command=self.tasks_tree.yview)
         self.tasks_tree.configure(yscrollcommand=scrollbar.set)
         
         # Размещаем элементы
-        self.tasks_tree.pack(side='left', fill='both', expand=True, padx=(10, 0), pady=(0, 10))
-        scrollbar.pack(side='right', fill='y', pady=(0, 10))
+        self.tasks_tree.pack(side='left', fill='both', expand=True)
+        scrollbar.pack(side='right', fill='y')
+        
+        # Привязываем обработчики событий
+        self.tasks_tree.bind('<Double-1>', self.on_task_double_click)
+        self.tasks_tree.bind('<Button-1>', self.on_task_click)
+        
+        # Инициализация переменных для чекбоксов
+        self.selected_tasks = set()
+        self.all_selected = False
         
         # Добавляем тестовые данные
         self.populate_test_data()
@@ -286,15 +329,15 @@ class JiraExportApp:
     def populate_test_data(self):
         """Заполняет таблицу тестовыми данными"""
         test_data = [
-            ("PROJ-123", "Исправить ошибку в аутентификации", "In Progress", "High", "Иван Петров", "2024-03-15"),
-            ("PROJ-124", "Добавить новую функцию экспорта", "To Do", "Medium", "Мария Сидорова", "2024-03-14"),
-            ("PROJ-125", "Обновить документацию API", "Done", "Low", "Алексей Смирнов", "2024-03-13"),
-            ("PROJ-126", "Оптимизировать производительность", "In Progress", "Highest", "Елена Козлова", "2024-03-12"),
-            ("PROJ-127", "Настроить CI/CD pipeline", "To Do", "High", "Дмитрий Волков", "2024-03-11"),
+            ("☐", "PROJ-123", "Исправить ошибку в аутентификации", "In Progress", "High", "Иван Петров", "2024-03-15", "Детали | PDF | JIRA"),
+            ("☐", "PROJ-124", "Добавить новую функцию экспорта", "To Do", "Medium", "Мария Сидорова", "2024-03-14", "Детали | PDF | JIRA"),
+            ("☐", "PROJ-125", "Обновить документацию API", "Done", "Low", "Алексей Смирнов", "2024-03-13", "Детали | PDF | JIRA"),
+            ("☐", "PROJ-126", "Оптимизировать производительность", "In Progress", "Highest", "Елена Козлова", "2024-03-12", "Детали | PDF | JIRA"),
+            ("☐", "PROJ-127", "Настроить CI/CD pipeline", "To Do", "High", "Дмитрий Волков", "2024-03-11", "Детали | PDF | JIRA"),
         ]
         
-        for item in test_data:
-            self.tasks_tree.insert("", "end", values=item)
+        for i, item in enumerate(test_data):
+            task_id = self.tasks_tree.insert("", "end", values=item)
     
     def login_to_jira(self):
         """Обработчик входа в JIRA"""
@@ -349,6 +392,253 @@ class JiraExportApp:
     def refresh_data(self):
         """Обновление данных"""
         messagebox.showinfo("Обновление", "Данные обновлены")
+    
+    # Методы для работы с чекбоксами и действиями
+    def toggle_all_selection(self):
+        """Переключает выделение всех задач"""
+        self.all_selected = not self.all_selected
+        
+        if self.all_selected:
+            # Выделяем все
+            for item in self.tasks_tree.get_children():
+                self.selected_tasks.add(item)
+                values = list(self.tasks_tree.item(item, 'values'))
+                values[0] = "☑"  # Отмеченный чекбокс
+                self.tasks_tree.item(item, values=values)
+            self.tasks_tree.heading("Выбрать", text="☑ Все")
+        else:
+            # Снимаем выделение
+            self.selected_tasks.clear()
+            for item in self.tasks_tree.get_children():
+                values = list(self.tasks_tree.item(item, 'values'))
+                values[0] = "☐"  # Пустой чекбокс
+                self.tasks_tree.item(item, values=values)
+            self.tasks_tree.heading("Выбрать", text="☐ Все")
+    
+    def on_task_click(self, event):
+        """Обрабатывает клик по задаче"""
+        region = self.tasks_tree.identify_region(event.x, event.y)
+        if region == "cell":
+            column = self.tasks_tree.identify_column(event.x)
+            item = self.tasks_tree.identify_row(event.y)
+            
+            if item and column == '#1':  # Колонка чекбоксов
+                self.toggle_task_selection(item)
+            elif item and column == '#8':  # Колонка действий
+                self.show_action_menu(event, item)
+    
+    def toggle_task_selection(self, item):
+        """Переключает выделение одной задачи"""
+        values = list(self.tasks_tree.item(item, 'values'))
+        
+        if item in self.selected_tasks:
+            # Снимаем выделение
+            self.selected_tasks.remove(item)
+            values[0] = "☐"
+        else:
+            # Добавляем в выделенные
+            self.selected_tasks.add(item)
+            values[0] = "☑"
+        
+        self.tasks_tree.item(item, values=values)
+        
+        # Обновляем состояние главного чекбокса
+        total_items = len(self.tasks_tree.get_children())
+        selected_count = len(self.selected_tasks)
+        
+        if selected_count == 0:
+            self.tasks_tree.heading("Выбрать", text="☐ Все")
+            self.all_selected = False
+        elif selected_count == total_items:
+            self.tasks_tree.heading("Выбрать", text="☑ Все")
+            self.all_selected = True
+        else:
+            self.tasks_tree.heading("Выбрать", text="☣ Все")
+            self.all_selected = False
+    
+    def show_action_menu(self, event, item):
+        """Показывает меню действий для задачи"""
+        # Получаем данные задачи
+        values = self.tasks_tree.item(item, 'values')
+        task_id = values[1]
+        
+        # Создаем контекстное меню
+        action_menu = tk.Menu(self.root, tearoff=0)
+        action_menu.add_command(label="📝 Детали", command=lambda: self.show_task_details(item))
+        action_menu.add_command(label="📚 PDF", command=lambda: self.export_task_pdf(item))
+        action_menu.add_command(label="🔗 Открыть в JIRA", command=lambda: self.open_in_jira(item))
+        
+        try:
+            action_menu.tk_popup(event.x_root, event.y_root)
+        finally:
+            action_menu.grab_release()
+    
+    def on_task_double_click(self, event):
+        """Обрабатывает двойной клик по задаче"""
+        item = self.tasks_tree.selection()[0] if self.tasks_tree.selection() else None
+        if item:
+            self.show_task_details(item)
+    
+    def show_task_details(self, item):
+        """Показывает модальное окно с деталями задачи"""
+        values = self.tasks_tree.item(item, 'values')
+        
+        # Создаем модальное окно
+        details_window = tk.Toplevel(self.root)
+        details_window.title(f"Детали задачи {values[1]}")
+        details_window.geometry("500x400")
+        details_window.transient(self.root)
+        details_window.grab_set()
+        
+        # Создаем форму с отключенными полями
+        tk.Label(details_window, text="ID задачи:", font=("Arial", 10, "bold")).pack(anchor='w', padx=20, pady=(20, 5))
+        id_entry = tk.Entry(details_window, font=("Arial", 10), state='disabled')
+        id_entry.pack(fill='x', padx=20, pady=(0, 10))
+        id_entry.config(state='normal')
+        id_entry.insert(0, values[1])
+        id_entry.config(state='disabled')
+        
+        tk.Label(details_window, text="Заголовок:", font=("Arial", 10, "bold")).pack(anchor='w', padx=20, pady=5)
+        title_entry = tk.Entry(details_window, font=("Arial", 10), state='disabled')
+        title_entry.pack(fill='x', padx=20, pady=(0, 10))
+        title_entry.config(state='normal')
+        title_entry.insert(0, values[2])
+        title_entry.config(state='disabled')
+        
+        tk.Label(details_window, text="Статус:", font=("Arial", 10, "bold")).pack(anchor='w', padx=20, pady=5)
+        status_entry = tk.Entry(details_window, font=("Arial", 10), state='disabled')
+        status_entry.pack(fill='x', padx=20, pady=(0, 10))
+        status_entry.config(state='normal')
+        status_entry.insert(0, values[3])
+        status_entry.config(state='disabled')
+        
+        tk.Label(details_window, text="Приоритет:", font=("Arial", 10, "bold")).pack(anchor='w', padx=20, pady=5)
+        priority_entry = tk.Entry(details_window, font=("Arial", 10), state='disabled')
+        priority_entry.pack(fill='x', padx=20, pady=(0, 10))
+        priority_entry.config(state='normal')
+        priority_entry.insert(0, values[4])
+        priority_entry.config(state='disabled')
+        
+        tk.Label(details_window, text="Исполнитель:", font=("Arial", 10, "bold")).pack(anchor='w', padx=20, pady=5)
+        assignee_entry = tk.Entry(details_window, font=("Arial", 10), state='disabled')
+        assignee_entry.pack(fill='x', padx=20, pady=(0, 10))
+        assignee_entry.config(state='normal')
+        assignee_entry.insert(0, values[5])
+        assignee_entry.config(state='disabled')
+        
+        tk.Label(details_window, text="Обновлено:", font=("Arial", 10, "bold")).pack(anchor='w', padx=20, pady=5)
+        updated_entry = tk.Entry(details_window, font=("Arial", 10), state='disabled')
+        updated_entry.pack(fill='x', padx=20, pady=(0, 20))
+        updated_entry.config(state='normal')
+        updated_entry.insert(0, values[6])
+        updated_entry.config(state='disabled')
+        
+        # Кнопка закрытия
+        tk.Button(
+            details_window,
+            text="Закрыть",
+            command=details_window.destroy,
+            font=("Arial", 12),
+            bg='#95A5A6',
+            fg='white',
+            padx=20,
+            pady=10
+        ).pack(pady=20)
+    
+    def export_task_pdf(self, item):
+        """Экспортирует задачу в PDF"""
+        from tkinter import filedialog
+        
+        values = self.tasks_tree.item(item, 'values')
+        task_id = values[1]
+        
+        # Открываем диалог сохранения
+        filename = filedialog.asksaveasfilename(
+            title=f"Сохранить PDF для {task_id}",
+            defaultextension=".pdf",
+            filetypes=[("PDF files", "*.pdf"), ("Все файлы", "*.*")]
+        )
+        
+        if filename:
+            try:
+                with open(filename, 'w') as f:
+                    f.write(f"PDF отчет для задачи {task_id}\n")
+                    f.write(f"Заголовок: {values[2]}\n")
+                    f.write(f"Статус: {values[3]}\n")
+                    f.write(f"Приоритет: {values[4]}\n")
+                    f.write(f"Исполнитель: {values[5]}\n")
+                    f.write(f"Обновлено: {values[6]}\n")
+                
+                messagebox.showinfo("Успех", f"PDF сохранен: {filename}")
+            except Exception as e:
+                messagebox.showerror("Ошибка", f"Ошибка сохранения: {str(e)}")
+    
+    def open_in_jira(self, item):
+        """Открывает задачу в JIRA"""
+        import webbrowser
+        
+        values = self.tasks_tree.item(item, 'values')
+        task_id = values[1]
+        
+        # Получаем URL из поля входа (если заполнено)
+        jira_url = getattr(self, 'url_entry', None)
+        if jira_url and jira_url.get().strip():
+            base_url = jira_url.get().strip().rstrip('/')
+            full_url = f"{base_url}/browse/{task_id}"
+        else:
+            # Используем заглушку
+            full_url = f"https://your-jira-instance.com/browse/{task_id}"
+        
+        try:
+            webbrowser.open(full_url)
+            messagebox.showinfo("Успех", f"Открываем задачу {task_id} в браузере")
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Ошибка открытия браузера: {str(e)}")
+    
+    def bulk_export_pdf(self):
+        """Массовый экспорт выбранных задач в PDF"""
+        if not self.selected_tasks:
+            messagebox.showwarning("Предупреждение", "Не выбрано ни одной задачи")
+            return
+        
+        from tkinter import filedialog
+        import os
+        
+        # Открываем диалог выбора папки
+        folder = filedialog.askdirectory(
+            title=f"Выберите папку для сохранения {len(self.selected_tasks)} PDF файлов"
+        )
+        
+        if folder:
+            exported_count = 0
+            for item in self.selected_tasks:
+                values = self.tasks_tree.item(item, 'values')
+                task_id = values[1]
+                filename = os.path.join(folder, f"task_{task_id}.pdf")
+                
+                try:
+                    with open(filename, 'w') as f:
+                        f.write(f"PDF отчет для задачи {task_id}\n")
+                        f.write(f"Заголовок: {values[2]}\n")
+                        f.write(f"Статус: {values[3]}\n")
+                        f.write(f"Приоритет: {values[4]}\n")
+                        f.write(f"Исполнитель: {values[5]}\n")
+                        f.write(f"Обновлено: {values[6]}\n")
+                    exported_count += 1
+                except Exception as e:
+                    messagebox.showerror("Ошибка", f"Ошибка сохранения {task_id}: {str(e)}")
+            
+            messagebox.showinfo("Успех", f"Экспортировано {exported_count} из {len(self.selected_tasks)} задач")
+    
+    def clear_selection(self):
+        """Снимает выделение со всех задач"""
+        self.selected_tasks.clear()
+        for item in self.tasks_tree.get_children():
+            values = list(self.tasks_tree.item(item, 'values'))
+            values[0] = "☐"
+            self.tasks_tree.item(item, values=values)
+        self.tasks_tree.heading("Выбрать", text="☐ Все")
+        self.all_selected = False
 
 def main():
     # Создаем главное окно

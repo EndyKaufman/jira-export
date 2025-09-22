@@ -26,7 +26,8 @@ function createViewModel() {
             status: 'In Progress',
             priority: 'High',
             assignee: 'Иван Петров',
-            updated: '2024-03-15'
+            updated: '2024-03-15',
+            selected: false
         },
         {
             id: 'PROJ-124',
@@ -34,7 +35,8 @@ function createViewModel() {
             status: 'To Do',
             priority: 'Medium',
             assignee: 'Мария Сидорова',
-            updated: '2024-03-14'
+            updated: '2024-03-14',
+            selected: false
         },
         {
             id: 'PROJ-125',
@@ -42,7 +44,8 @@ function createViewModel() {
             status: 'Done',
             priority: 'Low',
             assignee: 'Алексей Смирнов',
-            updated: '2024-03-13'
+            updated: '2024-03-13',
+            selected: false
         },
         {
             id: 'PROJ-126',
@@ -50,7 +53,8 @@ function createViewModel() {
             status: 'In Progress',
             priority: 'Highest',
             assignee: 'Елена Козлова',
-            updated: '2024-03-12'
+            updated: '2024-03-12',
+            selected: false
         },
         {
             id: 'PROJ-127',
@@ -58,9 +62,14 @@ function createViewModel() {
             status: 'To Do',
             priority: 'High',
             assignee: 'Дмитрий Волков',
-            updated: '2024-03-11'
+            updated: '2024-03-11',
+            selected: false
         }
     ]);
+    
+    // Переменные для выбора задач
+    viewModel.selectedTasksCount = 0;
+    viewModel.allSelected = false;
     
     // Пагинация
     viewModel.currentPage = 1;
@@ -172,6 +181,119 @@ function createViewModel() {
             title: 'Обновление',
             message: 'Данные обновлены',
             okButtonText: 'OK'
+        });
+    };
+    
+    // Новые функции для работы с чекбоксами и действиями
+    
+    // Переключение выбора одной задачи
+    viewModel.toggleTaskSelection = function(args) {
+        const task = args.object.bindingContext;
+        task.selected = !task.selected;
+        
+        // Обновляем счетчик выбранных задач
+        viewModel.updateSelectedCount();
+    };
+    
+    // Массовое переключение выбора
+    viewModel.toggleAllSelection = function() {
+        viewModel.allSelected = !viewModel.allSelected;
+        
+        for (let i = 0; i < viewModel.tasks.length; i++) {
+            const task = viewModel.tasks.getItem(i);
+            task.selected = viewModel.allSelected;
+            viewModel.tasks.setItem(i, task);
+        }
+        
+        viewModel.updateSelectedCount();
+    };
+    
+    // Обновление счетчика выбранных задач
+    viewModel.updateSelectedCount = function() {
+        let count = 0;
+        for (let i = 0; i < viewModel.tasks.length; i++) {
+            if (viewModel.tasks.getItem(i).selected) {
+                count++;
+            }
+        }
+        viewModel.set('selectedTasksCount', count);
+    };
+    
+    // Очистка выбора
+    viewModel.clearSelection = function() {
+        for (let i = 0; i < viewModel.tasks.length; i++) {
+            const task = viewModel.tasks.getItem(i);
+            task.selected = false;
+            viewModel.tasks.setItem(i, task);
+        }
+        viewModel.allSelected = false;
+        viewModel.updateSelectedCount();
+    };
+    
+    // Показ деталей задачи
+    viewModel.showTaskDetails = function(args) {
+        const task = args.object.bindingContext;
+        
+        Dialogs.alert({
+            title: `Детали задачи ${task.id}`,
+            message: `ID: ${task.id}
+Заголовок: ${task.title}
+Статус: ${task.status}
+Приоритет: ${task.priority}
+Исполнитель: ${task.assignee}
+Обновлено: ${task.updated}`,
+            okButtonText: 'Закрыть'
+        });
+    };
+    
+    // Экспорт задачи в PDF
+    viewModel.exportTaskPdf = function(args) {
+        const task = args.object.bindingContext;
+        
+        Dialogs.alert({
+            title: 'Экспорт PDF',
+            message: `Генерируем PDF для задачи ${task.id}...
+
+Заголовок: ${task.title}
+Статус: ${task.status}
+Приоритет: ${task.priority}`,
+            okButtonText: 'Готово'
+        });
+    };
+    
+    // Открытие задачи в JIRA
+    viewModel.openInJira = function(args) {
+        const task = args.object.bindingContext;
+        const jiraUrl = viewModel.jiraUrl || 'https://your-jira-instance.com';
+        const fullUrl = `${jiraUrl}/browse/${task.id}`;
+        
+        Dialogs.alert({
+            title: 'Открытие в JIRA',
+            message: `Открываем задачу ${task.id} в браузере:\n\n${fullUrl}`,
+            okButtonText: 'Открыть'
+        });
+        
+        // Здесь можно добавить логику открытия браузера
+        // utils.openUrl(fullUrl);
+    };
+    
+    // Массовый экспорт в PDF
+    viewModel.bulkExportPdf = function() {
+        const selectedTasks = viewModel.tasks.filter(task => task.selected);
+        
+        if (selectedTasks.length === 0) {
+            Dialogs.alert({
+                title: 'Предупреждение',
+                message: 'Не выбрано ни одной задачи',
+                okButtonText: 'OK'
+            });
+            return;
+        }
+        
+        Dialogs.alert({
+            title: 'Массовый экспорт',
+            message: `Экспортируем ${selectedTasks.length} задач в PDF...\n\nЗадачи: ${selectedTasks.map(t => t.id).join(', ')}`,
+            okButtonText: 'Готово'
         });
     };
 

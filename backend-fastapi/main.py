@@ -19,6 +19,19 @@ class Task(BaseModel):
     priority: str
     assignee: str
     updated: str
+    selected: bool = False
+
+class TaskAction(BaseModel):
+    task_id: str
+    action_type: str  # "details", "pdf", "jira"
+
+class BulkActionRequest(BaseModel):
+    task_ids: List[str]
+    action_type: str  # "pdf_export", "jira_open", "status_update"
+    
+class TaskSelectionRequest(BaseModel):
+    task_ids: List[str]
+    selected: bool
 
 class TasksResponse(BaseModel):
     tasks: List[Task]
@@ -58,7 +71,8 @@ TEST_TASKS = [
         status="In Progress",
         priority="High",
         assignee="Иван Петров",
-        updated="2024-03-15"
+        updated="2024-03-15",
+        selected=False
     ),
     Task(
         id="PROJ-124",
@@ -66,7 +80,8 @@ TEST_TASKS = [
         status="To Do",
         priority="Medium",
         assignee="Мария Сидорова",
-        updated="2024-03-14"
+        updated="2024-03-14",
+        selected=False
     ),
     Task(
         id="PROJ-125",
@@ -74,7 +89,8 @@ TEST_TASKS = [
         status="Done",
         priority="Low",
         assignee="Алексей Смирнов",
-        updated="2024-03-13"
+        updated="2024-03-13",
+        selected=False
     ),
     Task(
         id="PROJ-126",
@@ -82,7 +98,8 @@ TEST_TASKS = [
         status="In Progress",
         priority="Highest",
         assignee="Елена Козлова",
-        updated="2024-03-12"
+        updated="2024-03-12",
+        selected=False
     ),
     Task(
         id="PROJ-127",
@@ -90,7 +107,8 @@ TEST_TASKS = [
         status="To Do",
         priority="High",
         assignee="Дмитрий Волков",
-        updated="2024-03-11"
+        updated="2024-03-11",
+        selected=False
     ),
     Task(
         id="PROJ-128",
@@ -98,7 +116,8 @@ TEST_TASKS = [
         status="Backlog",
         priority="Medium",
         assignee="Ольга Новикова",
-        updated="2024-03-10"
+        updated="2024-03-10",
+        selected=False
     ),
     Task(
         id="PROJ-129",
@@ -106,7 +125,8 @@ TEST_TASKS = [
         status="Done",
         priority="High",
         assignee="Павел Казаков",
-        updated="2024-03-09"
+        updated="2024-03-09",
+        selected=False
     ),
     Task(
         id="PROJ-130",
@@ -114,7 +134,8 @@ TEST_TASKS = [
         status="In Progress",
         priority="Low",
         assignee="Анна Лебедева",
-        updated="2024-03-08"
+        updated="2024-03-08",
+        selected=False
     )
 ]
 
@@ -130,6 +151,10 @@ async def root():
             "/tasks - Получение списка задач",
             "/tasks/filter - Фильтрация задач",
             "/tasks/{task_id} - Получение деталей задачи",
+            "/tasks/{task_id}/export-pdf - Экспорт задачи в PDF",
+            "/tasks/bulk/export-pdf - Массовый экспорт в PDF",
+            "/tasks/selection - Управление выбором задач",
+            "/tasks/{task_id}/action - Выполнение действия над задачей",
             "/health - Проверка здоровья API"
         ]
     }
@@ -286,6 +311,165 @@ async def get_tasks_status():
         "status_breakdown": status_stats,
         "priority_breakdown": priority_stats,
         "last_updated": max(task.updated for task in TEST_TASKS)
+    }
+
+# Новые эндпоинты для работы с чекбоксами и действиями
+
+@app.post("/tasks/selection")
+async def update_task_selection(selection_request: TaskSelectionRequest):
+    """
+    Обновление состояния выбора задач
+    """
+    updated_tasks = []
+    
+    for task in TEST_TASKS:
+        if task.id in selection_request.task_ids:
+            task.selected = selection_request.selected
+            updated_tasks.append(task.id)
+    
+    return {
+        "status": "success",
+        "message": f"Обновлено состояние выбора для {len(updated_tasks)} задач",
+        "updated_tasks": updated_tasks,
+        "selected": selection_request.selected
+    }
+
+@app.get("/tasks/selected")
+async def get_selected_tasks():
+    """
+    Получение списка выбранных задач
+    """
+    selected_tasks = [task for task in TEST_TASKS if task.selected]
+    
+    return {
+        "selected_tasks": selected_tasks,
+        "selected_count": len(selected_tasks),
+        "total_count": len(TEST_TASKS)
+    }
+
+@app.post("/tasks/{task_id}/action")
+async def perform_task_action(task_id: str, action: TaskAction):
+    """
+    Выполнение действия над задачей
+    """
+    task = next((task for task in TEST_TASKS if task.id == task_id), None)
+    
+    if not task:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Задача с ID {task_id} не найдена"
+        )
+    
+    if action.action_type == "details":
+        return {
+            "status": "success",
+            "action": "details",
+            "task": task,
+            "message": f"Получены детали задачи {task_id}"
+        }
+    elif action.action_type == "pdf":
+        return {
+            "status": "success",
+            "action": "pdf_export",
+            "task_id": task_id,
+            "task_title": task.title,
+            "pdf_url": f"/downloads/task_{task_id}.pdf",
+            "generated_at": datetime.now().isoformat(),
+            "message": f"PDF для задачи {task_id} сгенерирован"
+        }
+    elif action.action_type == "jira":
+        jira_url = f"https://your-jira-instance.com/browse/{task_id}"
+        return {
+            "status": "success",
+            "action": "jira_link",
+            "task_id": task_id,
+            "jira_url": jira_url,
+            "message": f"Ссылка на задачу {task_id} в JIRA"
+        }
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Неизвестный тип действия: {action.action_type}"
+        )
+
+@app.post("/tasks/bulk/export-pdf")
+async def bulk_export_pdf(bulk_request: BulkActionRequest):
+    """
+    Массовый экспорт задач в PDF
+    """
+    if bulk_request.action_type != "pdf_export":
+        raise HTTPException(
+            status_code=400,
+            detail="Данный эндпоинт поддерживает только экспорт PDF"
+        )
+    
+    # Находим задачи по ID
+    tasks_to_export = [task for task in TEST_TASKS if task.id in bulk_request.task_ids]
+    
+    if not tasks_to_export:
+        raise HTTPException(
+            status_code=404,
+            detail="Не найдено задач для экспорта"
+        )
+    
+    exported_files = []
+    for task in tasks_to_export:
+        exported_files.append({
+            "task_id": task.id,
+            "task_title": task.title,
+            "pdf_url": f"/downloads/task_{task.id}.pdf"
+        })
+    
+    return {
+        "status": "success",
+        "action": "bulk_pdf_export",
+        "exported_count": len(exported_files),
+        "total_requested": len(bulk_request.task_ids),
+        "exported_files": exported_files,
+        "generated_at": datetime.now().isoformat(),
+        "message": f"Экспортировано {len(exported_files)} задач в PDF"
+    }
+
+@app.post("/tasks/bulk/clear-selection")
+async def clear_all_selection():
+    """
+    Очистка выбора всех задач
+    """
+    cleared_count = 0
+    for task in TEST_TASKS:
+        if task.selected:
+            task.selected = False
+            cleared_count += 1
+    
+    return {
+        "status": "success",
+        "message": f"Очищен выбор для {cleared_count} задач",
+        "cleared_count": cleared_count
+    }
+
+@app.post("/tasks/bulk/toggle-all")
+async def toggle_all_selection():
+    """
+    Переключение выбора всех задач
+    """
+    # Проверяем, все ли задачи выбраны
+    all_selected = all(task.selected for task in TEST_TASKS)
+    
+    # Переключаем состояние
+    new_selection_state = not all_selected
+    changed_count = 0
+    
+    for task in TEST_TASKS:
+        if task.selected != new_selection_state:
+            task.selected = new_selection_state
+            changed_count += 1
+    
+    return {
+        "status": "success",
+        "message": f"{'Выбраны' if new_selection_state else 'Отменен выбор'} все задачи",
+        "new_state": new_selection_state,
+        "changed_count": changed_count,
+        "total_tasks": len(TEST_TASKS)
     }
 
 if __name__ == "__main__":
