@@ -163,7 +163,7 @@ install-mobile: ## Установить зависимости для mobile п�
 
 build-mobile: ## Собрать mobile проект в .apk
 	@echo "$(YELLOW)Сборка mobile проекта в .apk...$(NC)"
-	cd $(MOBILE_DIR) && tns build android --release
+	cd $(MOBILE_DIR) && ns build android --release
 
 test-mobile: ## Запустить тесты mobile проекта
 	@echo "$(YELLOW)Запуск тестов mobile проекта...$(NC)"
@@ -171,7 +171,7 @@ test-mobile: ## Запустить тесты mobile проекта
 
 run-mobile: ## Запустить mobile приложение на эмуляторе
 	@echo "$(YELLOW)Запуск mobile приложения...$(NC)"
-	cd $(MOBILE_DIR) && tns run android
+	cd $(MOBILE_DIR) && ns run android
 
 publish-mobile: ## Опубликовать mobile проект в Google Play
 	@echo "$(YELLOW)Подготовка к публикации mobile проекта...$(NC)"
@@ -180,7 +180,7 @@ publish-mobile: ## Опубликовать mobile проект в Google Play
 
 clean-mobile: ## Очистить mobile проект
 	@echo "$(YELLOW)Очистка mobile проекта...$(NC)"
-	cd $(MOBILE_DIR) && tns clean || true
+	cd $(MOBILE_DIR) && ns clean || true
 	cd $(MOBILE_DIR) && rm -rf node_modules/ platforms/ hooks/ || true
 
 # =============================================================================
@@ -251,7 +251,7 @@ check-deps: ## Проверить установленные зависимос�
 		echo "   macOS: brew install node"; \
 		echo "" \
 	)
-	@tns --version 2>/dev/null && echo "NativeScript CLI: установлен" || (\
+	@ns --version 2>/dev/null && echo "NativeScript CLI: установлен" || (\
 		echo "$(RED)NativeScript CLI: не установлен$(NC)"; \
 		echo "💡 Установка NativeScript CLI:"; \
 		echo "   npm install -g nativescript"; \

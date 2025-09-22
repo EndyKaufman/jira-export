@@ -14,6 +14,7 @@ set "NC=[0m"
 :: Python virtualenv настройки
 set "PYTHON_VENV_DIR=.venv"
 set "PYTHON_ACTIVATE_SCRIPT=Scripts\activate.bat"
+set "JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-25.0.0.36-hotspot"
 
 if "%1"=="" goto :help
 if "%1"=="help" goto :help
@@ -242,7 +243,7 @@ goto :eof
 :build_mobile
 echo %YELLOW%Сборка mobile проекта в .apk...%NC%
 cd mobile-nativescript
-tns build android --release
+ns build android --release
 cd ..
 goto :eof
 
@@ -256,7 +257,7 @@ goto :eof
 :run_mobile
 echo %YELLOW%Запуск mobile приложения...%NC%
 cd mobile-nativescript
-tns run android
+ns run android
 cd ..
 goto :eof
 
@@ -269,7 +270,7 @@ goto :eof
 :clean_mobile
 echo %YELLOW%Очистка mobile проекта...%NC%
 cd mobile-nativescript
-tns clean 2>nul
+ns clean 2>nul
 if exist node_modules rmdir /s /q node_modules
 if exist platforms rmdir /s /q platforms
 if exist hooks rmdir /s /q hooks
@@ -373,7 +374,7 @@ node --version 2>nul && (
     echo    Или через chocolatey: choco install nodejs
     echo.
 )
-tns --version 2>nul && (
+ns --version 2>nul && (
     echo NativeScript CLI: установлен
 ) || (
     echo %RED%NativeScript CLI: не установлен%NC%

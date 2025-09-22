@@ -110,7 +110,7 @@ npm run build.android
 ### Сборка APK файла
 ```bash
 # Релизная сборка APK
-tns build android --release --key-store-path <path-to-keystore> --key-store-password <password> --key-store-alias <alias> --key-store-alias-password <alias-password>
+ns build android --release --key-store-path <path-to-keystore> --key-store-password <password> --key-store-alias <alias> --key-store-alias-password <alias-password>
 ```
 
 ## Структура проекта
