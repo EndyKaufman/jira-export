@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">JIRA Export Mobile</string>
+    <string name="title_activity_main">JIRA Export Mobile</string>
+    <string name="package_name">com.jiraexport.mobile</string>
+    <string name="custom_url_scheme">com.jiraexport.mobile</string>
+</resources>

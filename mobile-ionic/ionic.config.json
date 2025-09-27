@@ -1,0 +1,7 @@
+{
+  "name": "JIRA Export Mobile",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "custom"
+}

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <title>JIRA Export Mobile</title>
+  
+  <base href="/" />
+  
+  <meta name="color-scheme" content="light dark" />
+  <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="msapplication-tap-highlight" content="no" />
+  
+  <link rel="icon" type="image/png" href="assets/icon/favicon.png" />
+  
+  <!-- add to homescreen for ios -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  <!-- Ionic CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ionic/core/css/ionic.bundle.css" />
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+  <ion-app>
+    <ion-tabs>
+      <!-- Вкладка Авторизация -->
+      <ion-tab tab="login">
+        <ion-header>
+          <ion-toolbar color="primary">
+            <ion-title>Авторизация JIRA</ion-title>
+          </ion-toolbar>
+        </ion-header>
+        
+        <ion-content class="ion-padding">
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>Вход в JIRA</ion-card-title>
+            </ion-card-header>
+            
+            <ion-card-content>
+              <ion-item>
+                <ion-label position="stacked">URL JIRA</ion-label>
+                <ion-input id="jiraUrl" placeholder="https://your-domain.atlassian.net" type="url"></ion-input>
+              </ion-item>
+              
+              <ion-item>
+                <ion-label position="stacked">Email</ion-label>
+                <ion-input id="email" placeholder="your-email@domain.com" type="email"></ion-input>
+              </ion-item>
+              
+              <ion-item>
+                <ion-label position="stacked">API Token</ion-label>
+                <ion-input id="apiToken" placeholder="Ваш API токен" type="password"></ion-input>
+              </ion-item>
+              
+              <ion-button expand="block" id="loginBtn" class="ion-margin-top">
+                Войти
+              </ion-button>
+              
+              <ion-text color="medium" class="ion-margin-top">
+                <p>Статус: <span id="loginStatus">Не авторизован</span></p>
+              </ion-text>
+            </ion-card-content>
+          </ion-card>
+        </ion-content>
+      </ion-tab>
+
+      <!-- Вкладка Фильтры -->
+      <ion-tab tab="filters">
+        <ion-header>
+          <ion-toolbar color="primary">
+            <ion-title>Фильтры задач</ion-title>
+          </ion-toolbar>
+        </ion-header>
+        
+        <ion-content class="ion-padding">
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>Настройка фильтров</ion-card-title>
+            </ion-card-header>
+            
+            <ion-card-content>
+              <ion-item>
+                <ion-label position="stacked">Проект</ion-label>
+                <ion-input id="projectKey" placeholder="PROJECT-KEY"></ion-input>
+              </ion-item>
+              
+              <ion-item>
+                <ion-label position="stacked">Статус</ion-label>
+                <ion-select id="statusFilter" multiple="true" placeholder="Выберите статусы">
+                  <ion-select-option value="Open">Открыто</ion-select-option>
+                  <ion-select-option value="In Progress">В работе</ion-select-option>
+                  <ion-select-option value="Done">Выполнено</ion-select-option>
+                  <ion-select-option value="To Do">К выполнению</ion-select-option>
+                </ion-select>
+              </ion-item>
+              
+              <ion-item>
+                <ion-label position="stacked">Тип задачи</ion-label>
+                <ion-select id="issueTypeFilter" multiple="true" placeholder="Выберите типы">
+                  <ion-select-option value="Bug">Ошибка</ion-select-option>
+                  <ion-select-option value="Task">Задача</ion-select-option>
+                  <ion-select-option value="Story">История</ion-select-option>
+                  <ion-select-option value="Epic">Эпик</ion-select-option>
+                </ion-select>
+              </ion-item>
+              
+              <ion-item>
+                <ion-label position="stacked">Исполнитель</ion-label>
+                <ion-input id="assigneeFilter" placeholder="username или displayName"></ion-input>
+              </ion-item>
+              
+              <ion-button expand="block" id="applyFiltersBtn" class="ion-margin-top">
+                Применить фильтры
+              </ion-button>
+            </ion-card-content>
+          </ion-card>
+        </ion-content>
+      </ion-tab>
+
+      <!-- Вкладка Задачи -->
+      <ion-tab tab="issues">
+        <ion-header>
+          <ion-toolbar color="primary">
+            <ion-title>Задачи JIRA</ion-title>
+            <ion-buttons slot="end">
+              <ion-button id="refreshBtn">
+                <ion-icon name="refresh-outline"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
+        
+        <ion-content>
+          <ion-refresher slot="fixed" id="refresher">
+            <ion-refresher-content></ion-refresher-content>
+          </ion-refresher>
+          
+          <ion-list id="issuesList">
+            <!-- Задачи будут загружены динамически -->
+          </ion-list>
+          
+          <ion-infinite-scroll id="infiniteScroll">
+            <ion-infinite-scroll-content></ion-infinite-scroll-content>
+          </ion-infinite-scroll>
+        </ion-content>
+      </ion-tab>
+
+      <!-- Вкладка Действия -->
+      <ion-tab tab="actions">
+        <ion-header>
+          <ion-toolbar color="primary">
+            <ion-title>Действия</ion-title>
+          </ion-toolbar>
+        </ion-header>
+        
+        <ion-content class="ion-padding">
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>Экспорт и действия</ion-card-title>
+              <ion-card-subtitle>Выбранных задач: <span id="selectedCount">0</span></ion-card-subtitle>
+            </ion-card-header>
+            
+            <ion-card-content>
+              <ion-button expand="block" id="exportPdfBtn" color="success" class="ion-margin-bottom">
+                <ion-icon name="document-text-outline" slot="start"></ion-icon>
+                Экспорт в PDF
+              </ion-button>
+              
+              <ion-button expand="block" id="selectAllBtn" color="secondary" class="ion-margin-bottom">
+                <ion-icon name="checkbox-outline" slot="start"></ion-icon>
+                Выбрать все
+              </ion-button>
+              
+              <ion-button expand="block" id="unselectAllBtn" color="medium" class="ion-margin-bottom">
+                <ion-icon name="square-outline" slot="start"></ion-icon>
+                Снять выделение
+              </ion-button>
+              
+              <ion-button expand="block" id="openJiraBtn" color="tertiary">
+                <ion-icon name="open-outline" slot="start"></ion-icon>
+                Открыть выбранные в JIRA
+              </ion-button>
+            </ion-card-content>
+          </ion-card>
+        </ion-content>
+      </ion-tab>
+
+      <!-- Навигация -->
+      <ion-tab-bar slot="bottom">
+        <ion-tab-button tab="login">
+          <ion-icon name="log-in-outline"></ion-icon>
+          <ion-label>Авторизация</ion-label>
+        </ion-tab-button>
+        
+        <ion-tab-button tab="filters">
+          <ion-icon name="filter-outline"></ion-icon>
+          <ion-label>Фильтры</ion-label>
+        </ion-tab-button>
+        
+        <ion-tab-button tab="issues">
+          <ion-icon name="list-outline"></ion-icon>
+          <ion-label>Задачи</ion-label>
+        </ion-tab-button>
+        
+        <ion-tab-button tab="actions">
+          <ion-icon name="settings-outline"></ion-icon>
+          <ion-label>Действия</ion-label>
+        </ion-tab-button>
+      </ion-tab-bar>
+    </ion-tabs>
+  </ion-app>
+
+  <!-- Loading and Toast components -->
+  <ion-loading></ion-loading>
+  <ion-toast></ion-toast>
+
+  <!-- Ionic JavaScript -->
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.esm.js"></script>
+  <script nomodule src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.js"></script>
+  
+  <!-- App JavaScript -->
+  <script src="js/app.js"></script>
+</body>
+</html>

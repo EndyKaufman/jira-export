@@ -1,0 +1,191 @@
+/* JIRA Export Mobile - Ionic Custom Styles */
+
+/* Основные стили приложения */
+ion-app {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Стили для карточек */
+ion-card {
+  margin: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+ion-card-header {
+  padding-bottom: 8px;
+}
+
+ion-card-title {
+  font-size: 1.2em;
+  font-weight: 600;
+}
+
+ion-card-subtitle {
+  color: var(--ion-color-medium);
+  font-size: 0.9em;
+}
+
+/* Стили для списка задач */
+#issuesList ion-item {
+  --border-color: var(--ion-color-light);
+  --padding-start: 16px;
+  --padding-end: 16px;
+}
+
+#issuesList ion-label h2 {
+  font-size: 1.1em;
+  font-weight: 600;
+  margin: 4px 0;
+  color: var(--ion-color-dark);
+}
+
+#issuesList ion-label p {
+  font-size: 0.9em;
+  margin: 2px 0;
+  color: var(--ion-color-medium);
+}
+
+#issuesList ion-checkbox {
+  margin-right: 12px;
+}
+
+#issuesList ion-badge {
+  font-size: 0.8em;
+  border-radius: 12px;
+}
+
+/* Стили для кнопок */
+ion-button {
+  --border-radius: 8px;
+  font-weight: 500;
+}
+
+ion-button.ion-color-success {
+  --background: #28a745;
+  --background-activated: #218838;
+}
+
+ion-button.ion-color-secondary {
+  --background: #6c757d;
+  --background-activated: #5a6268;
+}
+
+/* Стили для форм */
+ion-item {
+  --border-radius: 4px;
+  --border-color: var(--ion-color-light-shade);
+  margin: 8px 0;
+}
+
+ion-input, ion-select {
+  --placeholder-color: var(--ion-color-medium);
+}
+
+/* Стили для заголовков */
+ion-toolbar {
+  --background: var(--ion-color-primary);
+  --color: white;
+}
+
+ion-title {
+  font-weight: 600;
+}
+
+/* Стили для вкладок */
+ion-tab-bar {
+  --background: var(--ion-color-light);
+  --border: 1px solid var(--ion-color-light-shade);
+}
+
+ion-tab-button {
+  --color: var(--ion-color-medium);
+  --color-selected: var(--ion-color-primary);
+}
+
+ion-tab-button ion-label {
+  font-size: 0.75em;
+  font-weight: 500;
+}
+
+/* Стили для статусов авторизации */
+#loginStatus {
+  font-weight: 600;
+}
+
+/* Стили для счетчика выбранных задач */
+#selectedCount {
+  font-weight: 600;
+  color: var(--ion-color-primary);
+}
+
+/* Адаптивные стили */
+@media (max-width: 768px) {
+  ion-card {
+    margin: 8px;
+  }
+  
+  #issuesList ion-label h2 {
+    font-size: 1em;
+  }
+  
+  #issuesList ion-label p {
+    font-size: 0.8em;
+  }
+}
+
+/* Анимации и переходы */
+ion-item {
+  transition: background-color 0.2s ease;
+}
+
+ion-item:hover {
+  --background: var(--ion-color-light);
+}
+
+ion-button {
+  transition: transform 0.1s ease;
+}
+
+ion-button:active {
+  transform: scale(0.98);
+}
+
+/* Кастомные цвета для приоритетов */
+.priority-highest {
+  --background: #dc3545;
+}
+
+.priority-high {
+  --background: #fd7e14;
+}
+
+.priority-medium {
+  --background: #007bff;
+}
+
+.priority-low {
+  --background: #6c757d;
+}
+
+.priority-lowest {
+  --background: #f8f9fa;
+  --color: #6c757d;
+}
+
+/* Стили для загрузки */
+ion-loading {
+  --background: rgba(255, 255, 255, 0.9);
+  --color: var(--ion-color-primary);
+}
+
+/* Стили для toast уведомлений */
+ion-toast {
+  --border-radius: 8px;
+  font-weight: 500;
+}
+
+/* Стили для infinite scroll */
+ion-infinite-scroll-content {
+  color: var(--ion-color-medium);
+}

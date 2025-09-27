@@ -9,10 +9,6 @@ desktop-python/build/
 desktop-python/dist/
 desktop-python/*.spec
 
-# Mobile NativeScript сборки
-mobile-nativescript/platforms/
-mobile-nativescript/hooks/
-mobile-nativescript/node_modules/
 
 # Backend FastAPI временные файлы
 backend-fastapi/requirements-lock.txt
@@ -21,7 +17,6 @@ backend-fastapi/requirements-lock.txt
 # Виртуальные среды Python (virtualenv)
 desktop-python/.venv/
 backend-fastapi/.venv/
-mobile-nativescript/.venv/
 .venv/
 venv/
 env/

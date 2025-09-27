@@ -13,7 +13,7 @@ NC := \033[0m # No Color
 
 # Основные директории проектов
 DESKTOP_DIR := desktop-python
-MOBILE_DIR := mobile-nativescript
+MOBILE_DIR := mobile-ionic
 BACKEND_DIR := backend-fastapi
 
 # Python virtualenv настройки
@@ -45,7 +45,7 @@ help: ## Показать справку по командам
 	@echo "  run-desktop     - Запустить приложение"
 	@echo "  publish-desktop - Опубликовать проект"
 	@echo ""
-	@echo "$(YELLOW)Mobile NativeScript проект:$(NC)"
+	@echo "$(YELLOW)Mobile Ionic проект:$(NC)"
 	@echo "  install-mobile  - Установить зависимости"
 	@echo "  build-mobile    - Собрать .apk"
 	@echo "  test-mobile     - Запустить тесты"
@@ -154,7 +154,7 @@ clean-desktop: ## Очистить desktop проект
 	cd $(DESKTOP_DIR) && rm -rf build/ dist/ *.spec __pycache__/ $(PYTHON_VENV_DIR) || true
 
 # =============================================================================
-# MOBILE NATIVESCRIPT ПРОЕКТ
+# MOBILE IONIC ПРОЕКТ
 # =============================================================================
 
 install-mobile: ## Установить зависимости для mobile проекта
@@ -163,7 +163,7 @@ install-mobile: ## Установить зависимости для mobile п�
 
 build-mobile: ## Собрать mobile проект в .apk
 	@echo "$(YELLOW)Сборка mobile проекта в .apk...$(NC)"
-	cd $(MOBILE_DIR) && ns build android --release
+	cd $(MOBILE_DIR) && ionic capacitor build android
 
 test-mobile: ## Запустить тесты mobile проекта
 	@echo "$(YELLOW)Запуск тестов mobile проекта...$(NC)"
@@ -171,17 +171,17 @@ test-mobile: ## Запустить тесты mobile проекта
 
 run-mobile: ## Запустить mobile приложение на эмуляторе
 	@echo "$(YELLOW)Запуск mobile приложения...$(NC)"
-	cd $(MOBILE_DIR) && ns run android
+	cd $(MOBILE_DIR) && ionic capacitor run android
 
 publish-mobile: ## Опубликовать mobile проект в Google Play
 	@echo "$(YELLOW)Подготовка к публикации mobile проекта...$(NC)"
 	@echo "APK готов для загрузки в Google Play Console"
-	@echo "Файл находится в $(MOBILE_DIR)/platforms/android/app/build/outputs/apk/"
+	@echo "Файл находится в $(MOBILE_DIR)/android/app/build/outputs/apk/"
 
 clean-mobile: ## Очистить mobile проект
 	@echo "$(YELLOW)Очистка mobile проекта...$(NC)"
-	cd $(MOBILE_DIR) && ns clean || true
-	cd $(MOBILE_DIR) && rm -rf node_modules/ platforms/ hooks/ || true
+	cd $(MOBILE_DIR) && ionic capacitor clean android || true
+	cd $(MOBILE_DIR) && rm -rf node_modules/ android/ ios/ || true
 
 # =============================================================================
 # BACKEND FASTAPI ПРОЕКТ
@@ -229,7 +229,7 @@ clean-backend: ## Очистить backend проект
 status: ## Показать статус всех проектов
 	@echo "$(GREEN)Статус проектов:$(NC)"
 	@echo "Desktop Python: $(shell [ -f $(DESKTOP_DIR)/main.py ] && echo "✓ готов" || echo "✗ не готов")"
-	@echo "Mobile NativeScript: $(shell [ -f $(MOBILE_DIR)/app.js ] && echo "✓ готов" || echo "✗ не готов")"
+	echo "Mobile Ionic: $(shell [ -f $(MOBILE_DIR)/src/index.html ] && echo "✓ готов" || echo "✗ не готов")"
 	@echo "Backend FastAPI: $(shell [ -f $(BACKEND_DIR)/main.py ] && echo "✓ готов" || echo "✗ не готов")"
 
 check-deps: ## Проверить установленные зависимости
@@ -251,16 +251,16 @@ check-deps: ## Проверить установленные зависимос�
 		echo "   macOS: brew install node"; \
 		echo "" \
 	)
-	@ns --version 2>/dev/null && echo "NativeScript CLI: установлен" || (\
-		echo "$(RED)NativeScript CLI: не установлен$(NC)"; \
-		echo "💡 Установка NativeScript CLI:"; \
-		echo "   npm install -g nativescript"; \
-		echo "   Документация: https://docs.nativescript.org/"; \
+	@ionic --version 2>/dev/null && echo "Ionic CLI: установлен" || (\
+		echo "$(RED)Ionic CLI: не установлен$(NC)"; \
+		echo "💡 Установка Ionic CLI:"; \
+		echo "   npm install -g @ionic/cli"; \
+		echo "   Документация: https://ionicframework.com/docs/cli"; \
 		echo "" \
 	)
 	@java -version 2>/dev/null && echo "Java JDK: установлен" || (\
 		echo "$(RED)Java JDK: не установлен$(NC)"; \
-		echo "💡 Установка JDK для NativeScript:"; \
+		echo "💡 Установка JDK для Ionic Framework:"; \
 		echo "   Скачать JDK от Adoptium: https://adoptium.net/temurin/nightly"; \
 		echo "   Рекомендуемые версии: JDK 11 или JDK 17"; \
 		echo "   После установки настройте JAVA_HOME"; \

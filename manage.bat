@@ -74,7 +74,7 @@ echo   run-desktop     - Запустить приложение
 echo   publish-desktop - Опубликовать проект
 echo   clean-desktop   - Очистить проект
 echo.
-echo %YELLOW%Mobile NativeScript проект:%NC%
+echo %YELLOW%Mobile Ionic проект:%NC%
 echo   install-mobile  - Установить зависимости
 echo   build-mobile    - Собрать .apk
 echo   test-mobile     - Запустить тесты
@@ -230,50 +230,50 @@ cd ..
 goto :eof
 
 :: =============================================================================
-:: MOBILE NATIVESCRIPT ПРОЕКТ
+:: MOBILE IONIC ПРОЕКТ
 :: =============================================================================
 
 :install_mobile
 echo %YELLOW%Установка зависимостей для mobile проекта...%NC%
-cd mobile-nativescript
+cd mobile-ionic
 npm install
 cd ..
 goto :eof
 
 :build_mobile
 echo %YELLOW%Сборка mobile проекта в .apk...%NC%
-cd mobile-nativescript
-ns build android --release
+cd mobile-ionic
+ionic capacitor build android
 cd ..
 goto :eof
 
 :test_mobile
 echo %YELLOW%Запуск тестов mobile проекта...%NC%
-cd mobile-nativescript
+cd mobile-ionic
 npm test 2>nul || echo Тесты не настроены, добавьте тестовый фреймворк
 cd ..
 goto :eof
 
 :run_mobile
 echo %YELLOW%Запуск mobile приложения...%NC%
-cd mobile-nativescript
-ns run android
+cd mobile-ionic
+ionic capacitor run android
 cd ..
 goto :eof
 
 :publish_mobile
 echo %YELLOW%Подготовка к публикации mobile проекта...%NC%
 echo APK готов для загрузки в Google Play Console
-echo Файл находится в mobile-nativescript\platforms\android\app\build\outputs\apk\
+echo Файл находится в mobile-ionic\android\app\build\outputs\apk\
 goto :eof
 
 :clean_mobile
 echo %YELLOW%Очистка mobile проекта...%NC%
-cd mobile-nativescript
-ns clean 2>nul
+cd mobile-ionic
+ionic capacitor clean android 2>nul
 if exist node_modules rmdir /s /q node_modules
-if exist platforms rmdir /s /q platforms
-if exist hooks rmdir /s /q hooks
+if exist android rmdir /s /q android
+if exist ios rmdir /s /q ios
 cd ..
 goto :eof
 
@@ -348,7 +348,7 @@ goto :eof
 :status
 echo %GREEN%Статус проектов:%NC%
 if exist desktop-python\main.py (echo Desktop Python: ✓ готов) else (echo Desktop Python: ✗ не готов)
-if exist mobile-nativescript\app.js (echo Mobile NativeScript: ✓ готов) else (echo Mobile NativeScript: ✗ не готов)
+if exist mobile-ionic\src\index.html (echo Mobile Ionic: ✓ готов) else (echo Mobile Ionic: ✗ не готов)
 if exist backend-fastapi\main.py (echo Backend FastAPI: ✓ готов) else (echo Backend FastAPI: ✗ не готов)
 goto :end
 
@@ -374,20 +374,20 @@ node --version 2>nul && (
     echo    Или через chocolatey: choco install nodejs
     echo.
 )
-ns --version 2>nul && (
-    echo NativeScript CLI: установлен
+ionic --version 2>nul && (
+    echo Ionic CLI: установлен
 ) || (
-    echo %RED%NativeScript CLI: не установлен%NC%
-    echo 💡 Установка NativeScript CLI:
-    echo    npm install -g nativescript
-    echo    Документация: https://docs.nativescript.org/
+    echo %RED%Ionic CLI: не установлен%NC%
+    echo 💡 Установка Ionic CLI:
+    echo    npm install -g @ionic/cli
+    echo    Документация: https://ionicframework.com/docs/cli
     echo.
 )
 java -version 2>nul && (
     echo Java JDK: установлен
 ) || (
     echo %RED%Java JDK: не установлен%NC%
-    echo 💡 Установка JDK для NativeScript:
+    echo 💡 Установка JDK для Ionic Framework:
     echo    Скачать JDK от Adoptium: https://adoptium.net/temurin/nightly
     echo    Рекомендуемые версии: JDK 11 или JDK 17
     echo    После установки настройте JAVA_HOME
